@@ -20,7 +20,7 @@ public class EmovieServiceImpl implements IEmovieService{
     EmovieRepo movierepo;
 
     @Override
-    public GetEmoviesResponseDto addMovie(EmovieDto movie) {
+    public GetEmoviesResponseDto addMovie(EmovieDto movie) throws MovieRequestException{
         //validation
         validateAddMovieRequest(movie);
 
@@ -54,7 +54,7 @@ public class EmovieServiceImpl implements IEmovieService{
     }
 
     @Override
-    public void deleteMovie(int id) throws Exception {
+    public void deleteMovie(int id) throws MovieRequestException {
         //validate
         EmovieModel movie = movierepo.findEmovieModelById(id);
         if (movie == null) {
@@ -65,7 +65,7 @@ public class EmovieServiceImpl implements IEmovieService{
     }
 
     @Override
-    public GetEmoviesResponseDto getMovieById(int id) throws Exception {
+    public GetEmoviesResponseDto getMovieById(int id) throws MovieRequestException {
         EmovieModel movie = movierepo.findEmovieModelById(id);
         if (movie == null) {
             throw new MovieRequestException(String.format("No movie exist with id : %s", id), HttpStatus.BAD_REQUEST);
