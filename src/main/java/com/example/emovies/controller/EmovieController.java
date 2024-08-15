@@ -79,7 +79,6 @@ public class EmovieController {
         return ResponseEntity.ok(movies);
     }
 
-
     @Operation(
             summary = "Get movie by id",
             description = "REST API to get movie by id"
