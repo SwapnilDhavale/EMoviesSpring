@@ -1,10 +1,13 @@
 package com.example.emovies.service;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.example.emovies.dto.EmovieDto;
 import com.example.emovies.dto.GetEmoviesResponseDto;
+import com.example.emovies.exception.MovieRequestException;
 import com.example.emovies.model.EmovieModel;
 import com.example.emovies.repository.EmovieRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ public class EmovieServiceImpl implements IEmovieService{
     @Override
     public GetEmoviesResponseDto addMovie(EmovieDto movie) {
         //validation
+        validateAddMovieRequest(movie);
 
         //create model and save
         EmovieModel model = createMovieModel(movie);
@@ -32,6 +36,17 @@ public class EmovieServiceImpl implements IEmovieService{
         return responseDto;
     }
 
+    private void validateAddMovieRequest(EmovieDto movie) {
+        if (StringUtil.isNullOrEmpty(movie.getMovieName()) || StringUtil.isNullOrEmpty(movie.getDirector())) {
+            throw new MovieRequestException(String.format("Movie name or Director Name cannot be empty"), HttpStatus.BAD_REQUEST);
+        }
+        int rating = movie.getRating();
+
+        if (rating < 0 || rating > 10) {
+            throw new MovieRequestException(String.format("Invalid rating : %s. Rating needs to be in the range 0 - 10", rating), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @Override
     public List<GetEmoviesResponseDto> getAllMovies() {
         List<EmovieModel> movies = movierepo.findAll();
@@ -43,7 +58,7 @@ public class EmovieServiceImpl implements IEmovieService{
         //validate
         EmovieModel movie = movierepo.findEmovieModelById(id);
         if (movie == null) {
-            throw new Exception("NO SUC MOVIE");
+            throw new MovieRequestException(String.format("No movie exist with id : %s", id), HttpStatus.BAD_REQUEST);
         }
 
         movierepo.delete(movie);
@@ -53,7 +68,7 @@ public class EmovieServiceImpl implements IEmovieService{
     public GetEmoviesResponseDto getMovieById(int id) throws Exception {
         EmovieModel movie = movierepo.findEmovieModelById(id);
         if (movie == null) {
-            throw new Exception("NO SUC MOVIE");
+            throw new MovieRequestException(String.format("No movie exist with id : %s", id), HttpStatus.BAD_REQUEST);
         }
         GetEmoviesResponseDto responseDto = generateEmovieResponseDto(movie);
 
